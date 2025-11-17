@@ -1,16 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ethers } from 'ethers';
 
 const DriverView = ({ availableSpots, contract, setLoading, setNotification, onRefresh }) => {
-  const handleBookSpot = async (spot) => {
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [selectedSpot, setSelectedSpot] = useState(null);
+  const [bookingDetails, setBookingDetails] = useState({
+    hours: 1,
+    vehicleNumber: '',
+    phoneNumber: ''
+  });
+
+  const handleBookNowClick = (spot) => {
+    setSelectedSpot(spot);
+    setShowBookingForm(true);
+    setBookingDetails({
+      hours: 1,
+      vehicleNumber: '',
+      phoneNumber: ''
+    });
+  };
+
+  const handleConfirmBooking = async () => {
+    if (!bookingDetails.vehicleNumber || !bookingDetails.phoneNumber) {
+      setNotification({ 
+        type: 'error', 
+        message: 'Please fill in all details' 
+      });
+      return;
+    }
+
     try {
-      setLoading('Booking parking spot...');
-      const tx = await contract.bookSpot(spot.id, { value: spot.price });
+      setLoading('Processing payment and booking...');
+      const tx = await contract.bookSpot(selectedSpot.id, bookingDetails.hours, { 
+        value: selectedSpot.price.mul(bookingDetails.hours) 
+      });
       await tx.wait();
       setLoading(null);
+      setShowBookingForm(false);
       setNotification({ 
         type: 'success', 
-        message: `Successfully booked parking at ${spot.location}!` 
+        message: `Successfully booked parking at ${selectedSpot.location}!` 
       });
       await onRefresh();
     } catch (error) {
@@ -20,12 +49,123 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
       if (error.code === 4001) {
         setNotification({ type: 'error', message: 'Transaction rejected by user.' });
       } else if (error.message?.includes('insufficient funds')) {
-        setNotification({ type: 'error', message: 'Insufficient funds to book this spot.' });
+        setNotification({ type: 'error', message: 'Insufficient funds to complete this booking.' });
       } else {
         setNotification({ type: 'error', message: 'Failed to book spot. Please try again.' });
       }
     }
   };
+
+  if (showBookingForm && selectedSpot) {
+    return (
+      <div className="space-y-4">
+        <div className="card">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-primary-700">Booking Details</h2>
+            <button 
+              onClick={() => setShowBookingForm(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Selected Spot Info */}
+          <div className="bg-primary-50 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              </svg>
+              <p className="font-semibold text-primary-700">{selectedSpot.location}</p>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">{selectedSpot.description}</p>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm text-primary-600 font-medium">
+                {ethers.utils.formatEther(selectedSpot.price)} ETH per hour
+              </p>
+            </div>
+          </div>
+
+          {/* Booking Form */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Duration (hours)
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="24"
+                value={bookingDetails.hours}
+                onChange={(e) => setBookingDetails({...bookingDetails, hours: parseInt(e.target.value) || 1})}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Vehicle Number
+              </label>
+              <input
+                type="text"
+                placeholder="e.g., ABC-1234"
+                value={bookingDetails.vehicleNumber}
+                onChange={(e) => setBookingDetails({...bookingDetails, vehicleNumber: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                placeholder="e.g., +1234567890"
+                value={bookingDetails.phoneNumber}
+                onChange={(e) => setBookingDetails({...bookingDetails, phoneNumber: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Total Cost */}
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-700 font-medium">Total Cost</span>
+                <span className="text-2xl font-bold text-primary-700">
+                  {ethers.utils.formatEther(selectedSpot.price.mul(bookingDetails.hours))} ETH
+                </span>
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                {bookingDetails.hours} hour{bookingDetails.hours > 1 ? 's' : ''} × {ethers.utils.formatEther(selectedSpot.price)} ETH
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={() => setShowBookingForm(false)}
+                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmBooking}
+                className="flex-1 btn-primary"
+              >
+                Confirm & Pay
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -96,7 +236,7 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
                     )}
                   </div>
                   <button 
-                    onClick={() => handleBookSpot(spot)}
+                    onClick={() => handleBookNowClick(spot)}
                     className="btn-primary whitespace-nowrap"
                   >
                     Book Now

@@ -34,6 +34,11 @@
 - ✅ Browse available parking spots
 - ✅ View spot details (location, price, amenities, rating)
 - ✅ Book parking spots with ETH payment
+- ✅ Two-step booking process (details first, then payment)
+- ✅ Booking form with vehicle number and phone number
+- ✅ Duration selection (hourly booking)
+- ✅ Real-time cost calculation
+- ✅ Balance check only at final checkout
 - ✅ Escrow payment system
 - ✅ Booking time tracking
 - ✅ View booking history

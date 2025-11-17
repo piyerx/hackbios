@@ -33,6 +33,60 @@ function App() {
         return;
       }
 
+      // Check network FIRST
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+      const currentChainId = parseInt(chainId, 16);
+      
+      console.log('Current network chain ID:', currentChainId);
+      console.log('Expected Sepolia chain ID:', SEPOLIA_CHAIN_ID);
+
+      // If not on Sepolia, try to switch
+      if (currentChainId !== SEPOLIA_CHAIN_ID) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0xaa36a7' }], // Sepolia testnet in hex
+          });
+          setNotification({ 
+            type: 'success', 
+            message: 'Switched to Sepolia Testnet!' 
+          });
+        } catch (switchError) {
+          // Network not added to MetaMask
+          if (switchError.code === 4902) {
+            try {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: '0xaa36a7',
+                  chainName: 'Sepolia Testnet',
+                  nativeCurrency: {
+                    name: 'Sepolia ETH',
+                    symbol: 'SepoliaETH',
+                    decimals: 18
+                  },
+                  rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com/'],
+                  blockExplorerUrls: ['https://sepolia.etherscan.io']
+                }]
+              });
+            } catch (addError) {
+              console.error('Error adding Sepolia network:', addError);
+              setNotification({ 
+                type: 'error', 
+                message: 'Please add Sepolia Testnet to MetaMask manually!' 
+              });
+              return;
+            }
+          } else {
+            setNotification({ 
+              type: 'error', 
+              message: 'Please switch to Sepolia Testnet in MetaMask!' 
+            });
+            return;
+          }
+        }
+      }
+
       // Request account access
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
@@ -40,16 +94,11 @@ function App() {
       const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
       const web3Signer = web3Provider.getSigner();
       const address = await web3Signer.getAddress();
-
-      // Check network
-      const network = await web3Provider.getNetwork();
-      if (network.chainId !== SEPOLIA_CHAIN_ID) {
-        setNotification({ 
-          type: 'warning', 
-          message: `Please switch to ${SEPOLIA_CHAIN_NAME} for blockchain features!` 
-        });
-        // Continue anyway for demo mode with database
-      }
+      
+      // Get Sepolia balance
+      const balance = await web3Provider.getBalance(address);
+      const balanceInEth = ethers.utils.formatEther(balance);
+      console.log('Sepolia ETH Balance:', balanceInEth);
 
       // Initialize contract only if address is deployed
       let contractInstance = null;
@@ -84,7 +133,7 @@ function App() {
 
       setNotification({ 
         type: 'success', 
-        message: 'Wallet connected successfully!' 
+        message: `Connected to Sepolia! Balance: ${parseFloat(balanceInEth).toFixed(4)} SepoliaETH` 
       });
     } catch (error) {
       console.error('Error connecting wallet:', error);
