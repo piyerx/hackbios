@@ -23,8 +23,12 @@
 
 ### **3. Parking Spot Listing (Host Features)**
 - ✅ Create new parking spot listings
-- ✅ Set custom location
+- ✅ Parking space name input
+- ✅ Set custom location (manual or GPS auto-capture)
 - ✅ Set hourly price in ETH
+- ✅ Set booking duration in minutes
+- ✅ EV charging availability toggle
+- ✅ GPS coordinates capture with auto-location button
 - ✅ View my listed spots
 - ✅ Spot status tracking (Available/Booked)
 - ✅ Blockchain integration for spot creation
@@ -33,11 +37,13 @@
 ### **4. Parking Spot Booking (Driver Features)**
 - ✅ Browse available parking spots
 - ✅ View spot details (location, price, amenities, rating)
+- ✅ Green EV charging icon badge for spots with charging
 - ✅ Book parking spots with ETH payment
 - ✅ Two-step booking process (details first, then payment)
 - ✅ Booking form with vehicle number and phone number
 - ✅ Duration selection (hourly booking)
-- ✅ Real-time cost calculation
+- ✅ EV charging toggle (adds 20% surcharge when selected)
+- ✅ Real-time cost calculation with EV charging breakdown
 - ✅ Balance check only at final checkout
 - ✅ Escrow payment system
 - ✅ Booking time tracking

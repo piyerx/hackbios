@@ -7,7 +7,8 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
   const [bookingDetails, setBookingDetails] = useState({
     hours: 1,
     vehicleNumber: '',
-    phoneNumber: ''
+    phoneNumber: '',
+    useEVCharging: false
   });
 
   const handleBookNowClick = (spot) => {
@@ -16,7 +17,8 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
     setBookingDetails({
       hours: 1,
       vehicleNumber: '',
-      phoneNumber: ''
+      phoneNumber: '',
+      useEVCharging: false
     });
   };
 
@@ -31,15 +33,22 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
 
     try {
       setLoading('Processing payment and booking...');
+      
+      // Calculate total cost with EV charging if selected
+      let totalCost = selectedSpot.price.mul(bookingDetails.hours);
+      if (bookingDetails.useEVCharging) {
+        totalCost = totalCost.mul(120).div(100); // Add 20% for EV charging
+      }
+      
       const tx = await contract.bookSpot(selectedSpot.id, bookingDetails.hours, { 
-        value: selectedSpot.price.mul(bookingDetails.hours) 
+        value: totalCost 
       });
       await tx.wait();
       setLoading(null);
       setShowBookingForm(false);
       setNotification({ 
         type: 'success', 
-        message: `Successfully booked parking at ${selectedSpot.location}!` 
+        message: `Successfully booked parking at ${selectedSpot.location}!${bookingDetails.useEVCharging ? ' (EV Charging included)' : ''}` 
       });
       await onRefresh();
     } catch (error) {
@@ -133,17 +142,67 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
               />
             </div>
 
+            {/* EV Charging Toggle - Only show if spot has EV charging */}
+            {selectedSpot.amenities && selectedSpot.amenities.includes('EV Charging') && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <div>
+                      <span className="text-sm font-semibold text-green-800">EV Charging Available</span>
+                      <p className="text-xs text-green-600">Additional charge applies if selected</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={bookingDetails.useEVCharging}
+                      onChange={(e) => setBookingDetails({...bookingDetails, useEVCharging: e.target.checked})}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                  </label>
+                </div>
+              </div>
+            )}
+
             {/* Total Cost */}
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-700 font-medium">Total Cost</span>
-                <span className="text-2xl font-bold text-primary-700">
-                  {ethers.utils.formatEther(selectedSpot.price.mul(bookingDetails.hours))} ETH
-                </span>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600">Parking ({bookingDetails.hours}h)</span>
+                  <span className="font-medium">{ethers.utils.formatEther(selectedSpot.price.mul(bookingDetails.hours))} ETH</span>
+                </div>
+                {bookingDetails.useEVCharging && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-green-600 flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      EV Charging
+                    </span>
+                    <span className="font-medium text-green-700">
+                      {ethers.utils.formatEther(selectedSpot.price.mul(bookingDetails.hours).mul(20).div(100))} ETH
+                    </span>
+                  </div>
+                )}
+                <div className="border-t pt-2 flex justify-between items-center">
+                  <span className="text-gray-700 font-semibold">Total Cost</span>
+                  <span className="text-2xl font-bold text-primary-700">
+                    {bookingDetails.useEVCharging 
+                      ? ethers.utils.formatEther(selectedSpot.price.mul(bookingDetails.hours).mul(120).div(100))
+                      : ethers.utils.formatEther(selectedSpot.price.mul(bookingDetails.hours))
+                    } ETH
+                  </span>
+                </div>
               </div>
-              <p className="text-sm text-gray-500 mt-1">
-                {bookingDetails.hours} hour{bookingDetails.hours > 1 ? 's' : ''} × {ethers.utils.formatEther(selectedSpot.price)} ETH
-              </p>
+              {bookingDetails.useEVCharging && (
+                <p className="text-xs text-green-600 mt-2">
+                  * Includes 20% EV charging surcharge
+                </p>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -205,6 +264,14 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       </svg>
                       <p className="font-semibold text-primary-700">{spot.location}</p>
+                      {spot.amenities && spot.amenities.includes('EV Charging') && (
+                        <div className="ml-2 flex items-center gap-1 bg-green-100 px-2 py-0.5 rounded-full">
+                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                          <span className="text-xs font-medium text-green-700">EV</span>
+                        </div>
+                      )}
                     </div>
                     {spot.description && (
                       <p className="text-sm text-gray-600 mb-2">{spot.description}</p>

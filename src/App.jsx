@@ -205,43 +205,52 @@ function App() {
         }
       }
 
-      // If no spots from blockchain or no contract, load from database
-      if (available.length === 0 && myListedSpots.length === 0) {
-        try {
-          const dbListings = await api.getAllListings({ isBooked: false });
-          available.push(...dbListings.map(listing => ({
-            id: listing.spotId,
-            host: listing.hostAddress,
-            location: listing.location,
-            price: ethers.BigNumber.from(listing.priceInWei),
-            isBooked: listing.isBooked,
-            driver: listing.driverAddress,
-            bookingEndTime: listing.bookingEndTime,
-            description: listing.description,
-            amenities: listing.amenities,
-            rating: listing.rating,
-            reviews: listing.reviews,
-            availability: listing.availability
-          })));
+      // Always load from database to show all spots
+      try {
+        const dbListings = await api.getAllListings({ isBooked: false });
+        const dbSpots = dbListings.map(listing => ({
+          id: listing.spotId || listing._id,
+          host: listing.hostAddress,
+          location: listing.location,
+          price: ethers.BigNumber.from(listing.priceInWei || '1000000000000000'),
+          isBooked: listing.isBooked,
+          driver: listing.driverAddress,
+          bookingEndTime: listing.bookingEndTime || 0,
+          description: listing.description,
+          amenities: listing.amenities,
+          rating: listing.rating,
+          reviews: listing.reviews,
+          availability: listing.availability
+        }));
 
-          const myDbListings = await api.getListingsByHost(userAddress);
-          myListedSpots.push(...myDbListings.map(listing => ({
-            id: listing.spotId,
-            host: listing.hostAddress,
-            location: listing.location,
-            price: ethers.BigNumber.from(listing.priceInWei),
-            isBooked: listing.isBooked,
-            driver: listing.driverAddress,
-            bookingEndTime: listing.bookingEndTime,
-            description: listing.description,
-            amenities: listing.amenities,
-            rating: listing.rating,
-            reviews: listing.reviews,
-            availability: listing.availability
-          })));
-        } catch (error) {
-          console.error('Error loading from database:', error);
-        }
+        // Merge blockchain spots with database spots (avoid duplicates)
+        const blockchainSpotIds = available.map(s => s.id);
+        const uniqueDbSpots = dbSpots.filter(s => !blockchainSpotIds.includes(s.id));
+        available.push(...uniqueDbSpots);
+
+        // Load user's spots from database
+        const myDbListings = await api.getListingsByHost(userAddress);
+        const myDbSpots = myDbListings.map(listing => ({
+          id: listing.spotId || listing._id,
+          host: listing.hostAddress,
+          location: listing.location,
+          price: ethers.BigNumber.from(listing.priceInWei || '1000000000000000'),
+          isBooked: listing.isBooked,
+          driver: listing.driverAddress,
+          bookingEndTime: listing.bookingEndTime || 0,
+          description: listing.description,
+          amenities: listing.amenities,
+          rating: listing.rating,
+          reviews: listing.reviews,
+          availability: listing.availability
+        }));
+
+        // Merge with blockchain spots
+        const blockchainMySpotIds = myListedSpots.map(s => s.id);
+        const uniqueMyDbSpots = myDbSpots.filter(s => !blockchainMySpotIds.includes(s.id));
+        myListedSpots.push(...uniqueMyDbSpots);
+      } catch (error) {
+        console.error('Error loading from database:', error);
       }
 
       setAvailableSpots(available);
