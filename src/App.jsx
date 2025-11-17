@@ -171,7 +171,8 @@ function App() {
               }
 
               const spotData = {
-                id: spot.id.toNumber(),
+                id: `blockchain-${spot.id.toNumber()}`,
+                blockchainId: spot.id.toNumber(),
                 host: spot.host,
                 location: spot.location,
                 price: spot.price,
@@ -209,7 +210,8 @@ function App() {
       try {
         const dbListings = await api.getAllListings({ isBooked: false });
         const dbSpots = dbListings.map(listing => ({
-          id: listing.spotId || listing._id,
+          id: `db-${listing.spotId || listing._id}`,
+          dbId: listing.spotId || listing._id,
           host: listing.hostAddress,
           location: listing.location,
           price: ethers.BigNumber.from(listing.priceInWei || '1000000000000000'),
@@ -231,7 +233,8 @@ function App() {
         // Load user's spots from database
         const myDbListings = await api.getListingsByHost(userAddress);
         const myDbSpots = myDbListings.map(listing => ({
-          id: listing.spotId || listing._id,
+          id: `db-${listing.spotId || listing._id}`,
+          dbId: listing.spotId || listing._id,
           host: listing.hostAddress,
           location: listing.location,
           price: ethers.BigNumber.from(listing.priceInWei || '1000000000000000'),

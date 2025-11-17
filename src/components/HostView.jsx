@@ -167,7 +167,8 @@ const HostView = ({ mySpots, contract, setLoading, setNotification, onRefresh })
   const handleClaimPayment = async (spot) => {
     try {
       setLoading('Claiming payment...');
-      const tx = await contract.claimPayment(spot.id);
+      const spotId = spot.blockchainId !== undefined ? spot.blockchainId : spot.id;
+      const tx = await contract.claimPayment(spotId);
       await tx.wait();
       setLoading(null);
       setNotification({ 
