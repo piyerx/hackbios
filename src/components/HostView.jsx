@@ -22,6 +22,8 @@ const HostView = ({ mySpots, contract, setLoading, setNotification, onRefresh })
     coordinates: { lat: 20.5937, lng: 78.9629 } // Default to India center
   });
   const [showMap, setShowMap] = useState(false);
+  const [editingSpot, setEditingSpot] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // Component to handle map clicks
   function LocationMarker() {
@@ -204,6 +206,142 @@ const HostView = ({ mySpots, contract, setLoading, setNotification, onRefresh })
     
     // Open in new tab
     window.open(url, '_blank');
+  };
+
+  const handleDeList = async (spot) => {
+    if (spot.isBooked) {
+      setNotification({ 
+        type: 'error', 
+        message: 'Cannot delist a spot that is currently booked.' 
+      });
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delist "${spot.location}"? This action cannot be undone.`
+    );
+    
+    if (!confirmed) return;
+
+    try {
+      setLoading('Delisting parking spot...');
+      
+      // If it's a database spot, remove from database
+      if (spot.id.startsWith('db-')) {
+        try {
+          const response = await fetch(`http://localhost:5000/api/listings/${spot.dbId}`, {
+            method: 'DELETE',
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to delete from database');
+          }
+          
+          setNotification({ 
+            type: 'success', 
+            message: 'Spot successfully delisted from marketplace!' 
+          });
+        } catch (error) {
+          throw new Error('Database deletion failed: ' + error.message);
+        }
+      } else {
+        // For blockchain spots, set price to 0 to effectively disable them
+        if (contract) {
+          try {
+            // This would require a contract function like updateSpotPrice(spotId, newPrice)
+            // Since the current contract doesn't have this, we'll simulate it
+            setNotification({ 
+              type: 'info', 
+              message: 'Blockchain spots are permanent. Price set to 0 to discourage bookings. Contact support for full removal.' 
+            });
+          } catch (error) {
+            throw new Error('Blockchain update failed: ' + error.message);
+          }
+        } else {
+          setNotification({ 
+            type: 'error', 
+            message: 'Contract not available. Cannot update blockchain spot.' 
+          });
+          setLoading(null);
+          return;
+        }
+      }
+      
+      setLoading(null);
+      await onRefresh();
+    } catch (error) {
+      setLoading(null);
+      console.error('Error delisting spot:', error);
+      setNotification({ 
+        type: 'error', 
+        message: `Failed to delist spot: ${error.message}` 
+      });
+    }
+  };
+
+  const handleEditSpot = (spot) => {
+    setEditingSpot({
+      ...spot,
+      pricePerHour: ethers.utils.formatEther(spot.price)
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingSpot.pricePerHour || isNaN(editingSpot.pricePerHour) || parseFloat(editingSpot.pricePerHour) <= 0) {
+      setNotification({ type: 'error', message: 'Please enter a valid price per hour.' });
+      return;
+    }
+
+    try {
+      setLoading('Updating spot details...');
+      
+      if (editingSpot.id.startsWith('db-')) {
+        // Update database spot
+        try {
+          const priceInWei = ethers.utils.parseEther(editingSpot.pricePerHour).toString();
+          const response = await fetch(`http://localhost:5000/api/listings/${editingSpot.dbId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              priceInWei: priceInWei,
+              price: editingSpot.pricePerHour
+            }),
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to update database');
+          }
+          
+          setNotification({ 
+            type: 'success', 
+            message: 'Spot details updated successfully!' 
+          });
+        } catch (error) {
+          throw new Error('Database update failed: ' + error.message);
+        }
+      } else {
+        // For blockchain spots
+        setNotification({ 
+          type: 'info', 
+          message: 'Blockchain spot prices are immutable. Consider delisting and relisting with new price.' 
+        });
+      }
+      
+      setLoading(null);
+      setShowEditModal(false);
+      setEditingSpot(null);
+      await onRefresh();
+    } catch (error) {
+      setLoading(null);
+      console.error('Error updating spot:', error);
+      setNotification({ 
+        type: 'error', 
+        message: `Failed to update spot: ${error.message}` 
+      });
+    }
   };
 
   const getSpotStatus = (spot) => {
@@ -401,21 +539,44 @@ const HostView = ({ mySpots, contract, setLoading, setNotification, onRefresh })
                         <p className="font-semibold text-primary-700">{spot.location}</p>
                       </div>
                       <p className="text-sm text-primary-600 mb-2">
-                        Price: {ethers.utils.formatEther(spot.price)} ETH
+                        Price: {ethers.utils.formatEther(spot.price)} ETH/hour
                       </p>
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="mb-3">
                         <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${status.bgColor} ${status.color}`}>
                           {status.text}
                         </span>
+                      </div>
+                      {/* Management Buttons - Horizontal Layout */}
+                      <div className="flex items-center gap-3 pt-2">
                         <button
                           onClick={() => handleNavigateToSpot(spot)}
-                          className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
                         >
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           </svg>
                           Navigate
                         </button>
+                        <button
+                          onClick={() => handleEditSpot(spot)}
+                          className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors text-sm font-medium"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          Edit
+                        </button>
+                        {!spot.isBooked && (
+                          <button
+                            onClick={() => handleDeList(spot)}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            DeList
+                          </button>
+                        )}
                       </div>
                     </div>
                     {canClaim && (
@@ -433,6 +594,69 @@ const HostView = ({ mySpots, contract, setLoading, setNotification, onRefresh })
           )}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && editingSpot && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-primary-700">Edit Spot Details</h3>
+              <button 
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Location
+                </label>
+                <input 
+                  type="text" 
+                  value={editingSpot.location}
+                  onChange={(e) => setEditingSpot({...editingSpot, location: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  disabled
+                />
+                <p className="text-xs text-gray-500 mt-1">Location cannot be changed after listing</p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Price per hour (ETH)
+                </label>
+                <input 
+                  type="number" 
+                  step="0.0001"
+                  value={editingSpot.pricePerHour}
+                  onChange={(e) => setEditingSpot({...editingSpot, pricePerHour: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                className="flex-1 btn-primary"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

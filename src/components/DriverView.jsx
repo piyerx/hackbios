@@ -58,14 +58,37 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
     try {
       setLoading('Processing payment and booking...');
       
+      // Ensure hours is a valid integer first
+      const hours = parseInt(bookingDetails.hours);
+      if (isNaN(hours) || hours <= 0) {
+        setNotification({ 
+          type: 'error', 
+          message: 'Invalid booking duration' 
+        });
+        setLoading(null);
+        return;
+      }
+      
       // Calculate total cost with EV charging if selected
-      let totalCost = selectedSpot.price.mul(bookingDetails.hours);
+      let totalCost = selectedSpot.price.mul(hours);
       if (bookingDetails.useEVCharging) {
         totalCost = totalCost.mul(120).div(100); // Add 20% for EV charging
       }
       
-      const spotId = selectedSpot.blockchainId !== undefined ? selectedSpot.blockchainId : selectedSpot.id;
-      const tx = await contract.bookSpot(spotId, bookingDetails.hours, { 
+      // Get the numeric spot ID for blockchain
+      let spotId;
+      if (selectedSpot.blockchainId !== undefined) {
+        spotId = selectedSpot.blockchainId;
+      } else if (selectedSpot.id && typeof selectedSpot.id === 'string' && selectedSpot.id.startsWith('blockchain-')) {
+        spotId = parseInt(selectedSpot.id.replace('blockchain-', ''));
+      } else {
+        spotId = selectedSpot.id;
+      }
+      
+      console.log('Booking parameters:', { spotId, hours, totalCost: totalCost.toString() });
+      
+      // Call contract with only 2 arguments: spotId and hours
+      const tx = await contract.bookSpot(spotId, hours, { 
         value: totalCost 
       });
       await tx.wait();
