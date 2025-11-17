@@ -122,7 +122,19 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
                 min="1"
                 max="24"
                 value={bookingDetails.hours}
-                onChange={(e) => setBookingDetails({...bookingDetails, hours: parseInt(e.target.value) || 1})}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  if (value > 0 && value <= 24) {
+                    setBookingDetails({...bookingDetails, hours: value});
+                  } else if (e.target.value === '') {
+                    setBookingDetails({...bookingDetails, hours: 1});
+                  }
+                }}
+                onBlur={(e) => {
+                  if (!e.target.value || parseInt(e.target.value) < 1) {
+                    setBookingDetails({...bookingDetails, hours: 1});
+                  }
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
@@ -133,11 +145,19 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
               </label>
               <input
                 type="text"
-                placeholder="e.g., ABC-1234"
+                placeholder="e.g., MH12AB1234"
+                maxLength="10"
                 value={bookingDetails.vehicleNumber}
-                onChange={(e) => setBookingDetails({...bookingDetails, vehicleNumber: e.target.value})}
+                onChange={(e) => {
+                  const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                  // Indian format: 2 letters + 2 digits + 2 letters + 4 digits
+                  if (value.length <= 10) {
+                    setBookingDetails({...bookingDetails, vehicleNumber: value});
+                  }
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
+              <p className="text-xs text-gray-500 mt-1">Format: XX00XX0000 (e.g., MH12AB1234)</p>
             </div>
 
             <div>
@@ -146,11 +166,19 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
               </label>
               <input
                 type="tel"
-                placeholder="e.g., +1234567890"
+                placeholder="e.g., +919876543210"
+                maxLength="15"
                 value={bookingDetails.phoneNumber}
-                onChange={(e) => setBookingDetails({...bookingDetails, phoneNumber: e.target.value})}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9+]/g, '');
+                  // Allow + only at the start
+                  if (value === '' || (value[0] === '+' && /^\+?[0-9]*$/.test(value)) || /^[0-9]*$/.test(value)) {
+                    setBookingDetails({...bookingDetails, phoneNumber: value});
+                  }
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
+              <p className="text-xs text-gray-500 mt-1">Numbers only (+ allowed at start)</p>
             </div>
 
             {/* EV Charging Toggle - Only show if spot has EV charging */}
