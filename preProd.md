@@ -66,14 +66,19 @@
 ### **8. UI/UX Features**
 - ✅ Clean, modern interface with Tailwind CSS
 - ✅ Blue color theme (primary palette)
+- ✅ Inter font family for professional look
 - ✅ Responsive design
 - ✅ Tab navigation (Find Parking / List Your Spot)
-- ✅ Simplified homepage with 4-line description
+- ✅ Centered login box design (no header on landing page)
+- ✅ Professional landing page without emojis
+- ✅ Bullet-point feature list with subtle markers
+- ✅ Gradient icon background
 - ✅ Connect wallet CTA button
 - ✅ Loading overlay for transactions
 - ✅ Toast notifications for user feedback
 - ✅ Prominent "Find Parking" tab (main use case)
 - ✅ Smaller "List Your Spot" secondary tab
+- ✅ Header only visible after wallet connection
 
 ### **9. Backend API**
 - ✅ RESTful Express server

@@ -250,35 +250,58 @@ function App() {
         onClear={() => setNotification(null)} 
       />
 
-      {/* Header */}
-      <Header userAddress={userAddress} onConnect={connectWallet} />
+      {/* Header - Only show when wallet is connected */}
+      {userAddress && <Header userAddress={userAddress} onConnect={connectWallet} />}
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {!userAddress ? (
-          <div className="card text-center max-w-2xl mx-auto">
-            <div className="py-16">
-              <div className="w-24 h-24 bg-primary-600 text-white rounded-full flex items-center justify-center mx-auto mb-8">
-                <svg className="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+          <div className="min-h-screen flex items-center justify-center -mt-20">
+            <div className="bg-white rounded-2xl shadow-2xl p-12 max-w-lg w-full border border-gray-100">
+              <div className="text-center mb-8">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <svg className="w-11 h-11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                  ETHPark
+                </h1>
+                <p className="text-sm text-gray-500 font-medium tracking-wide">
+                  DECENTRALIZED PARKING MARKETPLACE
+                </p>
               </div>
-              <h1 className="text-4xl font-bold text-primary-700 mb-6">
-                Welcome to ETHPark
-              </h1>
-              <div className="text-lg text-gray-700 mb-8 leading-relaxed space-y-2">
-                <p>🚗 Find parking spots instantly or rent out your empty driveway</p>
-                <p>🔒 Secure payments through blockchain escrow - no middlemen</p>
-                <p>💰 Hosts earn ETH, drivers save time and money</p>
-                <p>⚡ Fast, trustless, and decentralized parking marketplace</p>
+              
+              <div className="space-y-4 mb-8 text-gray-700">
+                <div className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 bg-primary-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <p className="text-sm leading-relaxed">Find parking spots instantly or list your empty driveway for others to use</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 bg-primary-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <p className="text-sm leading-relaxed">Secure payments through blockchain escrow with no middlemen</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 bg-primary-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <p className="text-sm leading-relaxed">Hosts earn ETH while drivers save time and money</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 bg-primary-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <p className="text-sm leading-relaxed">Fast, trustless, and fully decentralized parking solution</p>
+                </div>
               </div>
+              
               <button 
                 onClick={connectWallet}
-                className="bg-primary-600 text-white px-10 py-4 rounded-lg font-bold text-lg hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl"
+                className="w-full bg-primary-600 text-white px-8 py-4 rounded-xl font-semibold text-base hover:bg-primary-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               >
-                Connect Wallet to Get Started
+                Connect Wallet
               </button>
+              
+              <p className="text-xs text-gray-400 text-center mt-6">
+                Built on Ethereum • Sepolia Testnet
+              </p>
             </div>
           </div>
         ) : (
