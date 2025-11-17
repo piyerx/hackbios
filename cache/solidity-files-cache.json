@@ -1,0 +1,40 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "D:\\HACKaTHONs\\OMEGA\\04 HackBios\\traffic\\contracts\\ParkingMarketplace.sol": {
+      "lastModificationDate": 1763363967802,
+      "contentHash": "548b9e1f580b11097c3f98dd08f727e2",
+      "sourceName": "contracts/ParkingMarketplace.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "ParkingMarketplace"
+      ]
+    }
+  }
+}
