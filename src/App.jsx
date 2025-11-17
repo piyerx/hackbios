@@ -312,7 +312,7 @@ function App() {
             {/* Conditional Views */}
             {activeView === 'driver' ? (
               <DriverView 
-                spots={availableSpots}
+                availableSpots={availableSpots}
                 contract={contract}
                 setLoading={setLoadingMessage}
                 setNotification={setNotification}
