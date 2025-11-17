@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const Header = ({ userAddress, onConnect }) => {
+const Header = ({ userAddress, userBalance, onConnect }) => {
   const [networkName, setNetworkName] = useState('');
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(true);
 
@@ -65,12 +65,18 @@ const Header = ({ userAddress, onConnect }) => {
           ) : (
             <div className="flex items-center gap-3">
               {networkName && (
-                <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                <div className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 ${
                   isCorrectNetwork 
                     ? 'bg-green-500 text-white' 
                     : 'bg-red-500 text-white animate-pulse'
                 }`}>
-                  {networkName}
+                  {isCorrectNetwork && userBalance ? (
+                    <span className="font-mono">
+                      {parseFloat(userBalance).toFixed(4)} SepETH
+                    </span>
+                  ) : (
+                    <span>{networkName}</span>
+                  )}
                 </div>
               )}
               <div className="bg-primary-700 px-4 py-2 rounded-lg">

@@ -15,6 +15,7 @@ function App() {
   const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
   const [userAddress, setUserAddress] = useState(null);
+  const [userBalance, setUserBalance] = useState('0');
   const [currentUser, setCurrentUser] = useState(null);
   const [availableSpots, setAvailableSpots] = useState([]);
   const [mySpots, setMySpots] = useState([]);
@@ -99,6 +100,7 @@ function App() {
       const balance = await web3Provider.getBalance(address);
       const balanceInEth = ethers.utils.formatEther(balance);
       console.log('Sepolia ETH Balance:', balanceInEth);
+      setUserBalance(balanceInEth);
 
       // Initialize contract only if address is deployed
       let contractInstance = null;
@@ -133,7 +135,7 @@ function App() {
 
       setNotification({ 
         type: 'success', 
-        message: `Connected to Sepolia! Balance: ${parseFloat(balanceInEth).toFixed(4)} SepoliaETH` 
+        message: 'Connected to Sepolia!' 
       });
     } catch (error) {
       console.error('Error connecting wallet:', error);
@@ -312,7 +314,11 @@ function App() {
       />
 
       {/* Header - Only show when wallet is connected */}
-      {userAddress && <Header userAddress={userAddress} onConnect={connectWallet} />}
+      {userAddress &&       <Header 
+        userAddress={userAddress}
+        userBalance={userBalance}
+        onConnect={connectWallet}
+      />}
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-4xl">
