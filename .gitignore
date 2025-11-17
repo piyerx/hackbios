@@ -7,14 +7,37 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
 dist
 dist-ssr
+build
 *.local
 
 # Environment variables
 .env
 .env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
+
+# Hardhat files
+cache
+artifacts
+typechain
+typechain-types
+coverage
+coverage.json
+
+# MongoDB
+*.db
+*.mongodb
 
 # Editor directories and files
 .vscode/*
@@ -26,3 +49,26 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.history/
+
+# OS files
+Thumbs.db
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Private keys (extra safety)
+*.pem
+*.key
+private.json
