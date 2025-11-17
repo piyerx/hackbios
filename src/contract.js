@@ -6,7 +6,7 @@ export const CONTRACT_ABI = [
   "event SpotBooked(uint256 indexed spotId, address indexed driver, uint256 bookingEndTime)",
   "event PaymentClaimed(uint256 indexed spotId, address indexed host, uint256 amount)",
   "function listSpot(string calldata _location, uint256 _price) external",
-  "function bookSpot(uint256 _spotId) external payable",
+  "function bookSpot(uint256 _spotId, uint256 _hours) external payable",
   "function claimPayment(uint256 _spotId) external",
   "function nextSpotId() public view returns (uint256)",
   "function getSpot(uint256 _spotId) public view returns (uint256 id, address host, string memory location, uint256 price, bool isBooked, address driver, uint256 bookingEndTime)"

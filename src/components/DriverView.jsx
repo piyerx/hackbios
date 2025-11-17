@@ -30,6 +30,22 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
     });
   };
 
+  const handleNavigate = (spot) => {
+    let url;
+    
+    // If spot has coordinates, use them for precise location pointing
+    if (spot.coordinates && spot.coordinates.lat && spot.coordinates.lng) {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${spot.coordinates.lat},${spot.coordinates.lng}`;
+    } else {
+      // Fallback to location string for directions
+      const encodedLocation = encodeURIComponent(spot.location);
+      url = `https://www.google.com/maps/dir/?api=1&destination=${encodedLocation}`;
+    }
+    
+    // Open in new tab
+    window.open(url, '_blank');
+  };
+
   const handleConfirmBooking = async () => {
     if (!bookingDetails.vehicleNumber || !bookingDetails.phoneNumber) {
       setNotification({ 
@@ -42,14 +58,37 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
     try {
       setLoading('Processing payment and booking...');
       
+      // Ensure hours is a valid integer first
+      const hours = parseInt(bookingDetails.hours);
+      if (isNaN(hours) || hours <= 0) {
+        setNotification({ 
+          type: 'error', 
+          message: 'Invalid booking duration' 
+        });
+        setLoading(null);
+        return;
+      }
+      
       // Calculate total cost with EV charging if selected
-      let totalCost = selectedSpot.price.mul(bookingDetails.hours);
+      let totalCost = selectedSpot.price.mul(hours);
       if (bookingDetails.useEVCharging) {
         totalCost = totalCost.mul(120).div(100); // Add 20% for EV charging
       }
       
-      const spotId = selectedSpot.blockchainId !== undefined ? selectedSpot.blockchainId : selectedSpot.id;
-      const tx = await contract.bookSpot(spotId, bookingDetails.hours, { 
+      // Get the numeric spot ID for blockchain
+      let spotId;
+      if (selectedSpot.blockchainId !== undefined) {
+        spotId = selectedSpot.blockchainId;
+      } else if (selectedSpot.id && typeof selectedSpot.id === 'string' && selectedSpot.id.startsWith('blockchain-')) {
+        spotId = parseInt(selectedSpot.id.replace('blockchain-', ''));
+      } else {
+        spotId = selectedSpot.id;
+      }
+      
+      console.log('Booking parameters:', { spotId, hours, totalCost: totalCost.toString() });
+      
+      // Call contract with only 2 arguments: spotId and hours
+      const tx = await contract.bookSpot(spotId, hours, { 
         value: totalCost 
       });
       await tx.wait();
@@ -242,6 +281,21 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
                   * Includes 20% EV charging surcharge
                 </p>
               )}
+            </div>
+
+            {/* Navigate Button */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <button
+                onClick={() => handleNavigate(selectedSpot)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Navigate to Parking Spot
+              </button>
+              <p className="text-xs text-blue-600 mt-1 text-center">Opens Google Maps with exact location</p>
             </div>
 
             {/* Action Buttons */}

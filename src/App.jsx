@@ -228,9 +228,10 @@ function App() {
         }));
 
         // Merge blockchain spots with database spots (avoid duplicates)
+        // Only show blockchain spots in available list for booking
         const blockchainSpotIds = available.map(s => s.id);
-        const uniqueDbSpots = dbSpots.filter(s => !blockchainSpotIds.includes(s.id));
-        available.push(...uniqueDbSpots);
+        // Don't add database spots to available list - only blockchain spots can be booked
+        // available.push(...uniqueDbSpots);
 
         // Load user's spots from database
         const myDbListings = await api.getListingsByHost(userAddress);
@@ -250,7 +251,7 @@ function App() {
           availability: listing.availability
         }));
 
-        // Merge with blockchain spots
+        // Merge with blockchain spots for host view
         const blockchainMySpotIds = myListedSpots.map(s => s.id);
         const uniqueMyDbSpots = myDbSpots.filter(s => !blockchainMySpotIds.includes(s.id));
         myListedSpots.push(...uniqueMyDbSpots);
