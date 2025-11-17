@@ -190,6 +190,22 @@ const HostView = ({ mySpots, contract, setLoading, setNotification, onRefresh })
     }
   };
 
+  const handleNavigateToSpot = (spot) => {
+    let url;
+    
+    // If spot has coordinates, use them for precise location pointing
+    if (spot.coordinates && spot.coordinates.lat && spot.coordinates.lng) {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${spot.coordinates.lat},${spot.coordinates.lng}`;
+    } else {
+      // Fallback to location string for directions
+      const encodedLocation = encodeURIComponent(spot.location);
+      url = `https://www.google.com/maps/dir/?api=1&destination=${encodedLocation}`;
+    }
+    
+    // Open in new tab
+    window.open(url, '_blank');
+  };
+
   const getSpotStatus = (spot) => {
     const currentTime = Math.floor(Date.now() / 1000);
     const canClaim = spot.isBooked && currentTime >= spot.bookingEndTime;
@@ -387,9 +403,20 @@ const HostView = ({ mySpots, contract, setLoading, setNotification, onRefresh })
                       <p className="text-sm text-primary-600 mb-2">
                         Price: {ethers.utils.formatEther(spot.price)} ETH
                       </p>
-                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${status.bgColor} ${status.color}`}>
-                        {status.text}
-                      </span>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${status.bgColor} ${status.color}`}>
+                          {status.text}
+                        </span>
+                        <button
+                          onClick={() => handleNavigateToSpot(spot)}
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          </svg>
+                          Navigate
+                        </button>
+                      </div>
                     </div>
                     {canClaim && (
                       <button 

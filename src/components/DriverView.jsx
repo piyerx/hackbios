@@ -30,6 +30,22 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
     });
   };
 
+  const handleNavigate = (spot) => {
+    let url;
+    
+    // If spot has coordinates, use them for precise location pointing
+    if (spot.coordinates && spot.coordinates.lat && spot.coordinates.lng) {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${spot.coordinates.lat},${spot.coordinates.lng}`;
+    } else {
+      // Fallback to location string for directions
+      const encodedLocation = encodeURIComponent(spot.location);
+      url = `https://www.google.com/maps/dir/?api=1&destination=${encodedLocation}`;
+    }
+    
+    // Open in new tab
+    window.open(url, '_blank');
+  };
+
   const handleConfirmBooking = async () => {
     if (!bookingDetails.vehicleNumber || !bookingDetails.phoneNumber) {
       setNotification({ 
@@ -242,6 +258,21 @@ const DriverView = ({ availableSpots, contract, setLoading, setNotification, onR
                   * Includes 20% EV charging surcharge
                 </p>
               )}
+            </div>
+
+            {/* Navigate Button */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <button
+                onClick={() => handleNavigate(selectedSpot)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Navigate to Parking Spot
+              </button>
+              <p className="text-xs text-blue-600 mt-1 text-center">Opens Google Maps with exact location</p>
             </div>
 
             {/* Action Buttons */}
