@@ -1,30 +1,40 @@
+> NOTE: *The final development [commit](https://github.com/piyerx/hackbios/commit/1c65ebd3e6dea2508b0524cfbc4ea6dce9b743e0) was made within the hackathon duration. Any changes made after that are only related to image attachments and readme updations.* 
+
 ![OMEGA_HackBios](https://github.com/user-attachments/assets/69ba6c55-4a90-4af3-a9b9-1eb1646cb7bd)
 
 # ETHPark - Decentralized Parking Marketplace
-
 A decentralized, peer-to-peer parking marketplace built on Ethereum. Think "Airbnb for parking spots" but without a central company.
+<p align="center">
+<img width="500" alt="ethpark_img" src="https://github.com/user-attachments/assets/f8b67df9-4d5d-4133-905b-cce56b7fce28" />
+</p>  
+<p align="center">
+  <a href="https://youtu.be/mJ_tdGQzv6Y?si=rHQx1qZITeyOVTM0"><img src="https://img.shields.io/badge/YouTube-Watch-red?logo=youtube" /></a>
+  <a href=""><img src="https://img.shields.io/badge/Live-Deployment-brightgreen?logo=firebase" /></a>
+</p>
 
-## 🚀 Features
+## ■ Features
 
 - **For Drivers**: Find and book parking spots instantly with secure blockchain payments
 - **For Hosts**: List your empty parking spot and earn passive income in ETH
 - **Trustless Escrow**: Smart contract holds payments securely until booking ends
 - **No Middleman**: Direct peer-to-peer transactions on the blockchain
+<img width="1600" alt="image" src="https://github.com/user-attachments/assets/e5926e5f-61e7-4236-b52d-777cae55c5fa" />
+<img width="600" alt="image" src="https://github.com/user-attachments/assets/87e518c4-954d-416b-8fa9-a40768c2851b" />
 
-## 🛠️ Tech Stack
+## ■ Tech Stack
 
 - **Frontend**: React + Vite
 - **Styling**: Tailwind CSS (Blue color theme)
 - **Web3**: ethers.js v5
 - **Network**: Ethereum Sepolia Testnet
 
-## 📋 Prerequisites
+## ■ Prerequisites
 
 - Node.js (v16 or higher)
 - MetaMask browser extension
 - Sepolia Testnet ETH (get from [Sepolia Faucet](https://sepoliafaucet.com/))
 
-## 🚀 Getting Started
+## ■ Getting Started
 
 ### 1. Install Dependencies
 
@@ -55,7 +65,7 @@ The app will open at `http://localhost:3000`
 3. Click "Connect Wallet" in the app
 4. Approve the connection
 
-## 🎯 How It Works
+## ■ How It Works
 
 ### The Workflow (User Journey)
 
@@ -80,7 +90,7 @@ The app will open at `http://localhost:3000`
 3. She clicks "Claim Payment"
 4. Smart contract transfers 0.01 ETH to Alice's wallet
 
-## 🏗️ Smart Contract Functions
+## ■ Smart Contract Functions
 
 ```solidity
 // Host lists a new parking spot
@@ -99,7 +109,7 @@ function nextSpotId() public view returns (uint256)
 function getSpot(uint256 _spotId) public view returns (...)
 ```
 
-## 🎨 UI Components
+## ■ UI Components
 
 - **Header**: Title, logo, and wallet connection
 - **Tabs**: Switch between Driver and Host views
@@ -108,12 +118,12 @@ function getSpot(uint256 _spotId) public view returns (...)
 - **LoadingOverlay**: Shows during transaction processing
 - **Notification**: Success/error messages (toast style)
 
-## 🎯 Hackathon Tracks
+## ■ Hackathon Tracks
 
 - **Traffic Track**: Addressing urban traffic congestion by making parking more efficient
 - **ETH-Based Track**: Using Ethereum smart contracts for trustless, decentralized peer-to-peer payments
 
-## 📝 Build Commands
+## ■ Build Commands
 
 ```bash
 # Development
@@ -126,36 +136,26 @@ npm run build
 npm run preview
 ```
 
-## 🔒 Security Features
+## ■ Security Features
 
 - **Trustless Escrow**: Payments held in smart contract until booking ends
 - **No Middleman**: Direct peer-to-peer transactions
 - **Transparent**: All transactions on public blockchain
 - **Immutable**: Smart contract code cannot be changed
 
-## 📱 Responsive Design
+## ■ Responsive Design
 
 The app is fully responsive and works on:
 - Desktop browsers
 - Tablets
 - Mobile devices
 
-## 🎨 Design System
+## ■ Design System
 
 - **Primary Colors**: Blue shades (no gradients)
 - **Background**: Light blue (primary-50)
 - **Buttons**: Solid blue (primary-600)
 - **Hover States**: Darker blue (primary-700)
 - **Text**: Dark blue (primary-700) and medium blue (primary-600)
-
-## 🤝 Contributing
-
-This is a hackathon MVP. Feel free to fork and improve!
-
-## 📄 License
-
-MIT
-
-## 🙏 Acknowledgments
-
+---
 Built for the HackBios 2025 Hackathon
