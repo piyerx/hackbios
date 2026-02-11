@@ -9,7 +9,7 @@ A decentralized, peer-to-peer parking marketplace built on Ethereum. Think "Airb
 </p>  
 <p align="center">
   <a href="https://youtu.be/mJ_tdGQzv6Y?si=rHQx1qZITeyOVTM0"><img src="https://img.shields.io/badge/YouTube-Watch-red?logo=youtube" /></a>
-  <a href=""><img src="https://img.shields.io/badge/Live-Deployment-brightgreen?logo=firebase" /></a>
+  <a href="https://ethpark-hackbios.vercel.app/"><img src="https://img.shields.io/badge/Live-Deployment-brightgreen?logo=firebase" /></a>
 </p>
 
 ## ■ Features
@@ -18,7 +18,7 @@ A decentralized, peer-to-peer parking marketplace built on Ethereum. Think "Airb
 - **For Hosts**: List your empty parking spot and earn passive income in ETH
 - **Trustless Escrow**: Smart contract holds payments securely until booking ends
 - **No Middleman**: Direct peer-to-peer transactions on the blockchain
-<img width="1600" alt="image" src="https://github.com/user-attachments/assets/e5926e5f-61e7-4236-b52d-777cae55c5fa" />
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/e5926e5f-61e7-4236-b52d-777cae55c5fa" />
 <img width="600" alt="image" src="https://github.com/user-attachments/assets/87e518c4-954d-416b-8fa9-a40768c2851b" />
 
 ## ■ Tech Stack
@@ -33,37 +33,6 @@ A decentralized, peer-to-peer parking marketplace built on Ethereum. Think "Airb
 - Node.js (v16 or higher)
 - MetaMask browser extension
 - Sepolia Testnet ETH (get from [Sepolia Faucet](https://sepoliafaucet.com/))
-
-## ■ Getting Started
-
-### 1. Install Dependencies
-
-```bash
-npm install
-```
-
-### 2. Configure Smart Contract
-
-Open `src/contract.js` and replace `YOUR_SEPOLIA_CONTRACT_ADDRESS_HERE` with your deployed contract address:
-
-```javascript
-export const CONTRACT_ADDRESS = "0xYourContractAddressHere";
-```
-
-### 3. Run Development Server
-
-```bash
-npm run dev
-```
-
-The app will open at `http://localhost:3000`
-
-### 4. Connect MetaMask
-
-1. Make sure MetaMask is installed
-2. Switch to Sepolia Testnet in MetaMask
-3. Click "Connect Wallet" in the app
-4. Approve the connection
 
 ## ■ How It Works
 
@@ -122,6 +91,37 @@ function getSpot(uint256 _spotId) public view returns (...)
 
 - **Traffic Track**: Addressing urban traffic congestion by making parking more efficient
 - **ETH-Based Track**: Using Ethereum smart contracts for trustless, decentralized peer-to-peer payments
+
+## ■ Getting Started
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Configure Smart Contract
+
+Open `src/contract.js` and replace `YOUR_SEPOLIA_CONTRACT_ADDRESS_HERE` with your deployed contract address:
+
+```javascript
+export const CONTRACT_ADDRESS = "0xYourContractAddressHere";
+```
+
+### 3. Run Development Server
+
+```bash
+npm run dev
+```
+
+The app will open at `http://localhost:3000`
+
+### 4. Connect MetaMask
+
+1. Make sure MetaMask is installed
+2. Switch to Sepolia Testnet in MetaMask
+3. Click "Connect Wallet" in the app
+4. Approve the connection
 
 ## ■ Build Commands
 
